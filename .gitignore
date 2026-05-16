@@ -1,0 +1,6 @@
+.env
+tmp/
+temp/
+logs/
+credentials/
+.DS_Store

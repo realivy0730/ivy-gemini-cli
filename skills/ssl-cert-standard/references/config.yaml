@@ -1,0 +1,32 @@
+meta:
+  owner: Ivy
+  type: skill
+  skill_id: ssl-cert-standard
+  version: 1.2
+  source: justar + rd-internal-crm + reddoor-route53
+
+naming:
+  pattern: "{prefix}-{env}-cert"
+  environments: [root, main, dev, sit, uat]
+  rules:
+    - dev/sit/uat 僅需萬用字元憑證
+    - 根域名憑證僅用於 prod
+    - 命名一律 kebab-case
+
+cloud_mapping:
+  gcp:
+    service: Certificate Manager
+    binding: Certificate Map → HTTPS Proxy
+    wildcard_requires: DNS Authorization
+    auto_renew: true
+  aws:
+    service: ACM
+    binding: ALB Listener / CloudFront
+    wildcard_requires: DNS Validation
+    auto_renew: true
+  azure:
+    service: App Service Managed Certificate
+    binding: App Service SNI
+    wildcard_requires: 不支援萬用字元
+    auto_renew: true
+    plan_requirement: Basic 以上

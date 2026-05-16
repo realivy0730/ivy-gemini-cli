@@ -1,0 +1,83 @@
+meta:
+  owner: Ivy
+  type: knowledge-base-manager
+  version: "1.0.0"
+
+config:
+  # 目錄結構定義
+  directories:
+    meta: "00_Meta"
+    core: "10_Core_Knowledge"
+    projects: "20_Projects"
+    archives: "99_Archives"
+  
+  # 重複檢測設定
+  duplicate_detection:
+    similarity_threshold: 0.8  # 80% 相似度視為重複
+    filename_patterns:
+      - "*backup*"
+      - "*old*"
+      - "*copy*"
+      - "*-v[0-9]*"
+      - "*-draft*"
+  
+  # Frontmatter 必填欄位
+  required_frontmatter:
+    - tags
+    - created
+    - updated
+    - type
+    - owner
+  
+  # 選填欄位
+  optional_frontmatter:
+    - version
+    - status
+    - related
+  
+  # Changelog 設定
+  changelog:
+    path: "00_Meta/changelog.md"
+    version_format: "semantic"  # semantic | date
+    categories:
+      - name: "修改"
+        emoji: "🔧"
+        key: "modification"
+      - name: "新增"
+        emoji: "✨"
+        key: "addition"
+      - name: "刪除"
+        emoji: "🗑️"
+        key: "deletion"
+      - name: "歸檔"
+        emoji: "📦"
+        key: "archive"
+      - name: "安全"
+        emoji: "🔐"
+        key: "security"
+      - name: "重構"
+        emoji: "📊"
+        key: "refactor"
+  
+  # 檔名規範
+  filename:
+    case: "kebab-case"
+    date_format: "YYYYMMDD"
+    forbidden_chars: [" ", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")"]
+  
+  # 程式碼區塊語言標記
+  code_block_languages:
+    - bash
+    - shell
+    - python
+    - yaml
+    - json
+    - javascript
+    - typescript
+    - markdown
+  
+  # 執行選項
+  execution:
+    backup_before_operation: true
+    dry_run_first: true
+    verbose_logging: true

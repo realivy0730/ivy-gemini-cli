@@ -1,0 +1,51 @@
+#!/bin/bash
+# ~/.kiro/scripts/kiro-gemini
+# Kiro-Gemini 深度整合包裝器 (The Smart Engine Wrapper)
+# 用途：動態注入全域與局部上下文，確保 Gemini CLI 掌握專案與 SRE 規範。
+
+set -e
+
+# --- 1. 定義路徑規範 ---
+GLOBAL_KIRO_ROOT="$HOME/.kiro"
+GLOBAL_STEERING="$GLOBAL_KIRO_ROOT/steering/global-rules.md"
+GLOBAL_STANDARDS="$GLOBAL_KIRO_ROOT/docs/core/operational-standards.md"
+
+LOCAL_KIRO_ROOT="$(pwd)/.kiro"
+LOCAL_DOCS_ROOT="$(pwd)/docs"
+PROJECT_STEERING="$LOCAL_KIRO_ROOT/steering/project-rules.md"
+PROJECT_CHANGELOG="$(pwd)/CHANGELOG.md"
+
+# --- 2. 啟動上下文掃描 (Context Injection) ---
+assemble_context() {
+    echo "=== GLOBAL SRE GOVERNANCE ==="
+    [ -f "$GLOBAL_STEERING" ] && cat "$GLOBAL_STEERING"
+    [ -f "$GLOBAL_STANDARDS" ] && cat "$GLOBAL_STANDARDS"
+    
+    if [ -d "$LOCAL_KIRO_ROOT" ]; then
+        echo -e "\n=== LOCAL PROJECT CONTEXT (.kiro) ==="
+        [ -f "$PROJECT_STEERING" ] && cat "$PROJECT_STEERING"
+    fi
+
+    if [ -d "$LOCAL_DOCS_ROOT" ]; then
+        echo -e "\n=== PROJECT KNOWLEDGE & BACKLOG (docs/) ==="
+        # 掃描專案文件摘要
+        find "$LOCAL_DOCS_ROOT" -name "*.md" -maxdepth 2 2>/dev/null | xargs -I {} bash -c "echo 'File: {}'; head -n 20 '{}'; echo '---'"
+    fi
+
+    if [ -f "$PROJECT_CHANGELOG" ]; then
+        echo -e "\n=== RECENT ACTIVITY (CHANGELOG) ==="
+        grep -hE "^## \[|^ - " "$PROJECT_CHANGELOG" 2>/dev/null | head -n 15
+    fi
+}
+
+# --- 3. 執行整合調用 ---
+# 產出暫存的 System Instruction
+CONTEXT_FILE=$(mktemp /tmp/kiro-context.XXXXXX)
+assemble_context > "$CONTEXT_FILE"
+
+# 呼叫 Gemini CLI (假設使用 --system 參數載入指令)
+# 這裡根據使用者需求，讓 Gemini 成為 Kiro 的執行引擎
+gemini --system "$(cat $CONTEXT_FILE)" "$@"
+
+# 清理
+rm -f "$CONTEXT_FILE"

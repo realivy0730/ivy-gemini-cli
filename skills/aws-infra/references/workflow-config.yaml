@@ -1,0 +1,128 @@
+meta:
+  owner: Ivy
+  type: skill
+  skill_id: aws-infra
+  version: 1.0
+  scope: global
+
+trigger:
+  keywords: ["aws", "ec2", "s3", "rds", "cloudfront", "lambda"]
+
+prerequisites:
+  - AWS CLI 已安裝
+  - AWS credentials 已配置
+  - 預設 region: ap-east-2
+
+workflow:
+  ec2:
+    - name: 列出 instances
+      tool: use_aws
+      params:
+        service_name: ec2
+        operation_name: describe-instances
+        region: ap-east-2
+    - name: 啟動 instance
+      tool: use_aws
+      params:
+        service_name: ec2
+        operation_name: start-instances
+        parameters:
+          instance-ids: ["${instance_id}"]
+
+  s3:
+    - name: 列出 buckets
+      tool: use_aws
+      params:
+        service_name: s3api
+        operation_name: list-buckets
+        region: ap-east-2
+    - name: 同步檔案
+      tool: use_aws
+      params:
+        service_name: s3
+        operation_name: sync
+        positional_args: ["${source}", "s3://${bucket}/${prefix}"]
+
+  cloudfront:
+    - name: 列出 distributions
+      tool: use_aws
+      params:
+        service_name: cloudfront
+        operation_name: list-distributions
+        region: us-east-1
+    - name: 建立 invalidation
+      tool: use_aws
+      params:
+        service_name: cloudfront
+        operation_name: create-invalidation
+        parameters:
+          distribution-id: "${distribution_id}"
+          paths: ["/*"]
+
+  rds:
+    - name: 列出 instances
+      tool: use_aws
+      params:
+        service_name: rds
+        operation_name: describe-db-instances
+        region: ap-east-2
+
+  iam:
+    - name: 列出 users
+      tool: use_aws
+      params:
+        service_name: iam
+        operation_name: list-users
+
+  security_check:
+    - S3 bucket 公開存取檢查
+    - IAM 權限過度檢查
+    - Security Group 規則檢查
+    - CloudFront SSL/TLS 配置
+    - RDS 加密狀態
+
+  route53:
+    - name: 列出 DNS 記錄
+      tool: use_aws
+      params:
+        service_name: route53
+        operation_name: list-resource-record-sets
+        parameters:
+          hosted-zone-id: "${hosted_zone_id}"
+    - name: 變更 DNS 記錄
+      tool: use_aws
+      params:
+        service_name: route53
+        operation_name: change-resource-record-sets
+        parameters:
+          hosted-zone-id: "${hosted_zone_id}"
+          change-batch: "file:///tmp/dns-change.json"
+    - name: S3 Website Redirect (Alias)
+      note: |
+        HostedZoneId 對照:
+          ap-northeast-1: Z2M4EHUR26P7ZW
+          ap-east-2: Z3OBBXNKZ5V0NE
+          us-east-1: Z3AQBSTGFYJSTF
+
+  elb:
+    - name: 列出 Load Balancers
+      tool: use_aws
+      params:
+        service_name: elbv2
+        operation_name: describe-load-balancers
+        region: ap-east-2
+    - name: 查看 Listeners
+      tool: use_aws
+      params:
+        service_name: elbv2
+        operation_name: describe-listeners
+        parameters:
+          load-balancer-arn: "${lb_arn}"
+    - name: 修改 Listener (Redirect)
+      tool: use_aws
+      params:
+        service_name: elbv2
+        operation_name: modify-listener
+        parameters:
+          listener-arn: "${listener_arn}"
+          default-actions: '[{"Type":"redirect","RedirectConfig":{"Protocol":"HTTPS","Host":"${target_host}","StatusCode":"HTTP_301"}}]'

@@ -1,0 +1,42 @@
+name: kb-sync
+description: 知識庫自動同步工具，任務執行後自動更新 INDEX.md、changelog.md 及相關文件。
+version: 1.0.0
+created: 2026-03-03
+updated: 2026-03-03
+owner: Ivy
+
+# 核心配置
+config:
+  # 同步設定
+  auto_sync: true
+  sync_on_task_complete: true
+  sync_interval: 0  # 0 = 立即同步
+  
+  # INDEX.md 設定
+  index_path: "00_Meta/INDEX.md"
+  auto_increment_version: true
+  sort_entries: true
+  
+  # Changelog 設定
+  changelog_path: "00_Meta/changelog.md"
+  version_format: "semantic"
+  auto_generate_entry: true
+  
+  # Knowledge Base 設定
+  kb_auto_update: true
+  
+  # 檢查設定
+  check_broken_links: true
+  check_frontmatter: true
+  check_duplicates: false
+
+# 觸發關鍵字
+triggers:
+  - "同步知識庫"
+  - "更新 INDEX"
+  - "更新 changelog"
+  - "kb-sync"
+
+# 整合的 skills
+integrations:
+  - kb-manager
