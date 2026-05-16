@@ -43,5 +43,5 @@
 
 ### 7. 配置版本控制與同步機制 (Config Version Control)
 - **同步目錄映射**: `~/.gemini` 目錄的配置已納入版本控制，其等同於本地的 `/Users/linyuanchun/ivy-gemini-cli`。
-- **遠端儲存庫**: 所有的核心配置與腳本將同步至 `https://github.com/ivy/ivy-gemini-cli`。
+- **遠端儲存庫**: 所有的核心配置與腳本將同步至 `https://github.com/realivy0730/ivy-gemini-cli`。
 - **異動規範**: 對全域配置的重大更新（如 `GEMINI.md`, `skills/`, `scripts/` 等），應同步提交至 GitHub，確保多環境配置的一致性與可攜性。
